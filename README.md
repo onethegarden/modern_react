@@ -135,5 +135,58 @@ const onRemove = useCallback(
   );
   ```
 
+
+<br/><br/><br/>
+
+#### - React.memo
+
+-  컴포넌트의 props 가 바뀌지 않으면 리렌더링을 방지하여 컴포넌트의 리렌더링 성능 최적화
+
+- 렌더링 최적화 하지 않을 컴포넌트에 React.memo 를 사용하는것은, 불필요한 props 비교만 하는 것이기 때문에 실제로 렌더링을 방지할수있는 상황이 있는 경우에만 사용해야 한다.
+
+- 감싸주는 방법으로 사용이 가능하다.
+
+  ```react
+  import React from 'react';
   
+  const CreateUser = ({ username, email, onChange, onCreate }) => {
+    return (
+      <div>
+        <input
+          name="username"
+          placeholder="계정명"
+        />
+        <button onClick={onCreate}>등록</button>
+      </div>
+    );
+  };
+  
+  export default React.memo(CreateUser);
+  ```
+
+- ```deps```에 ```users```가 들어있으면 배열이 바뀔 때마다 함수가 새로 만들어진다. 이걸 최적화 하려면 ```deps```에서 ```users```를 지우고 현재 ```useState```로 관리하는 ```users```참조하지 않게 한다.  => <u>함수형 업데이트 사용</u>
+
+  ```react
+  // 기존
+  const onRemove = useCallback(
+    id => {
+      setUsers(users.filter(user => user.id !== id));
+    },
+    [users]
+  );
+  
+  //최적화 
+  //deps에 users 지우고, 함수형 업데이트 사용
+  const onRemove = useCallback(id => {
+      setUsers(users => users.filter(user => user.id !== id));
+  }, []);
+  ```
+
+  
+
+<br/><br/><br/>
+
+#### - useReducer
+
+- 컴포넌트의 상태 업데이트 로직을 컴포넌트에서 분리시킬 수 있음.
 
