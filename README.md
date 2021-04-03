@@ -190,3 +190,64 @@ const onRemove = useCallback(
 
 - 컴포넌트의 상태 업데이트 로직을 컴포넌트에서 분리시킬 수 있음.
 
+- 객체를 파라미터로 받아와서 새로운 상태를 반환해주는 함수
+
+  ```javascript
+  //리듀서
+  function reducer(state, action) {
+    // 새로운 상태를 만드는 로직
+    // const nextState = ...
+    return nextState;
+  }
+  ```
+
+- useReducer의 사용법
+
+  ```javascript
+  const [state, dispatch] = useReducer(reducer, initialState);
+  ```
+
+  - state : 컴포넌트에서 사용 할 수 있는 상태
+  - dispatch : 액션을 발생시키는 함수 ```dispatch({ type: 'INCREMENT' })```
+
+- 비교
+
+  ```react
+  //리듀서 사용 전
+  const [number, setNumber] = useState(0);
+  
+  const onIncrease = () => {
+    setNumber((prevNumber) => prevNumber + 1);
+  };
+  
+  
+  
+  //리듀서 사용 후///////////////////
+  function reducer(state, action) {
+    switch (action.type) {
+      case "INCREMENT":
+        return state + 1;
+      default:
+        return state;
+    }
+  }
+  
+  const [number, dispatch] = useReducer(reducer, 0);
+  
+  const onIncrease = () => {
+    dispatch({ type: 'INCREMENT' });
+  };
+  
+  
+  ```
+
+
+
+
+
+
+
+#### - useState VS useReducer 어떤 것을 쓸까!
+
+- useState: 컴포넌트에서 관리하는 값이 딱 하나고, 그 값이 단순한 숫자, 문자열 또는 boolean 값일 때 관리하기 편함
+- 만약에 컴포넌트에서 관리하는 값이 여러개가 되어서 상태의 구조가 복잡해진다면 `useReducer`로 관리하는 것이 편함
