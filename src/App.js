@@ -42,14 +42,6 @@ function countActiveUsers(users) {
 
 function reducer(state, action) {
   switch (action.type) {
-    case "CHANGE_INPUT":
-      return {
-        ...state,
-        inputs: {
-          ...state.inputs,
-          [action.name]: action.value,
-        },
-      };
     case "CREATE_USER":
       return {
         inputs: initialState.inputs,
@@ -65,7 +57,7 @@ function reducer(state, action) {
     case "REMOVE_USER":
       return {
         ...state,
-        users: state.users.filter((user) => user.nextid !== action.id),
+        users: state.users.filter((user) => user.id !== action.id),
       };
     default:
       return state;
@@ -101,6 +93,7 @@ function App() {
       id,
     });
   }, []);
+
   const onRemove = useCallback((id) => {
     dispatch({
       type: "REMOVE_USER",
