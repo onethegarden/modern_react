@@ -241,13 +241,90 @@ const onRemove = useCallback(
   
   ```
 
-
-
-
-
-
+<br/><br/><br/>
 
 #### - useState VS useReducer 어떤 것을 쓸까!
 
 - useState: 컴포넌트에서 관리하는 값이 딱 하나고, 그 값이 단순한 숫자, 문자열 또는 boolean 값일 때 관리하기 편함
 - 만약에 컴포넌트에서 관리하는 값이 여러개가 되어서 상태의 구조가 복잡해진다면 `useReducer`로 관리하는 것이 편함
+
+<br/><br/><br/><br/><br/><br/>
+
+## Context API
+
+>리액트의 Context API 를 사용하면, 프로젝트 안에서 전역적으로 사용 할 수 있는 값을 관리 할 수 있음
+>
+>- 상태, 함수, 라이브러리, 인스턴스, DOM등 관리가 가능하다
+
+
+
+### 사용법
+
+#### 1. 선언 (App.js)
+
+- ```React.createContext()```라는 함수를 사용
+
+  ```javascript
+  const UserDispatch = React.createContext(null);
+  ```
+
+- ```createContext```의 파라미터에는 Context의 기본값을 설정할 수 있다. 
+
+- Context를 만들면 Context안의 ```Provider```라는 컴포넌트를 통하여 Context의 값을 정할 수 있다. ```value```라는 값을 설정해주면 된다.
+
+```react
+function reducer(state, action) {
+     //리듀서 내용
+}
+export const UserDispatch = React.createContext(null);
+
+
+function App() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const { users } = state;
+
+    return (
+        <>
+        <UserDispatch.Provider value = {dispatch}>
+          <UserList users={users}/>
+          </UserDispatch.Provider>
+        </>
+      );
+}
+```
+
+
+
+#### 2. 사용(UserList.js)
+
+- App에서 선언한 UserDispatch를 import하여 사용
+- ```useContext```라는 Hook을 사용해서 **UserDispatch Contexet를 조회**
+
+```react
+import React, {useContext} from "react";
+import {UserDispatch} from './App';
+
+const User = React.memo(function User({ user }) {
+  const dispatch = useContext(UserDispatch);
+  return (
+    <div>
+      <b
+        style={{
+          cursor: "pointer",
+          color: user.active ? "green" : "black",
+        }}
+        onClick={() =>{
+          dispatch({ type: 'TOGGLE_USER', id: user.id});
+        }}
+      >
+      &nbsp;
+      {user.username}</b>
+      <span>({user.email})</span>
+      <button onClick={() => {
+        dispatch({type:'REMOVE_USER', id: user.id})
+      }}>삭제</button>
+    </div>
+  );
+})
+```
+
