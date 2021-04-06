@@ -1,6 +1,7 @@
 import React, { useReducer, useMemo } from "react";
 import UserList from "./UserList";
 import CreateUser from "./CreateUser";
+import produce from "immer";
 
 const initialState = {
   inputs: {
@@ -37,22 +38,19 @@ function countActiveUsers(users) {
 function reducer(state, action) {
   switch (action.type) {
     case "CREATE_USER":
-      return {
-        inputs: initialState.inputs,
-        users: state.users.concat(action.user),
-      };
+      return produce(state, (draft) => {
+        draft.users.push(action.user);
+      });
     case "TOGGLE_USER":
-      return {
-        ...state,
-        users: state.users.map((user) =>
-          user.id === action.id ? { ...user, active: !user.active } : user
-        ),
-      };
+      return produce(state, (draft) => {
+        const user = draft.users.find((user) => user.id === action.id);
+        user.active = !user.active;
+      });
     case "REMOVE_USER":
-      return {
-        ...state,
-        users: state.users.filter((user) => user.id !== action.id),
-      };
+      return produce(state, (draft) => {
+        const index = draft.users.findIndex((user) => user.id === action.id);
+        draft.users.splice(index, 1);
+      });
     default:
       return state;
   }
@@ -67,7 +65,17 @@ function App() {
   const { users } = state;
 
   const count = useMemo(() => countActiveUsers(users), [users]);
+  const test = {
+    number: 1,
+    dontchangeMe: 2
+};
 
+const nextState = produce(draft => {
+    draft.number += 1;
+});
+console.log(nextState)
+console.log(nextState(test)); //{number: 2, dontchangeMe: 2}
+  
   return (
     <>
       <UserDispatch.Provider value={dispatch}>

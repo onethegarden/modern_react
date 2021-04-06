@@ -328,3 +328,163 @@ const User = React.memo(function User({ user }) {
 })
 ```
 
+<br/><br/><br/><br/><br/><br/>
+
+## Immer를 사용한 불변성 관리
+
+>  리액트에서 배열이나 객체를 업데이트 할 때, 직접 수정하면 안되고 불변성을 지켜주면서 업데이트를 해주어야 한다.
+
+- 객체 수정 : ```...```(spread) 연산자 사용
+
+  ```react
+  const object = {
+      a: 1,
+      b: 2
+  }
+  
+  const nextObject = {
+      ...object,
+      b: 3
+  }
+  ```
+
+  
+
+- 배열 수정 : ```concat```, ```filter```, ```map``` 등의 함수를 사용 (```push```, ```splice``` 사용 X)
+
+  ```react
+  const todos = [
+      {
+          id: 1,
+          text: '할일1',
+          done: true
+      },
+      {
+          id: 2,
+          text: '할일2',
+          done: false
+      },
+      {
+          id: 3,
+          text: '할일3',
+          done: false
+      }
+  ];
+  
+  const insert = todos.concat({
+      id: 4,
+      text: '할일4',
+      done: false
+  });
+  
+  const filter = todos.filter(todo => todo.id !== 2);
+  
+  
+  const toggle = todos.map(todo => {
+      todo.id === 2 ?
+          {
+          	...todo, 
+          	done: !todo.done,
+          }
+          :todo
+  })
+  ```
+
+  
+
+<br/><br/><br/>
+
+#### Immer를 사용한 구현
+
+- 기존 방식
+
+```react
+const nextState = {
+    ...state,
+    posts: state.posts.map(post =>
+    	post.id === 1
+        	? {
+        		...post,
+        		comments: post.comments.concat({
+                    id: 3,
+                    text: '새로운 댓글'
+                })
+    		}
+    )
+};
+```
+
+<br/>
+
+- **Immer** 사용 (Immer가 불변성 관리를 대신 해줌)
+
+```react
+const nextState = produce(state, draft => {
+    const post = draft.posts.find(post => post.id === 1);
+    post.comments.push({
+        id: 3,
+        text: '새로운 댓글'
+    });
+});
+```
+
+- ```produce(수정하고싶은 상태, 업데이트 정의)``` 를 사용한다. 이 함수는 상태를 반환한다.
+
+  ex)
+
+  ```react
+  const state = {
+      number: 1,
+      dontchangeMe: 2
+  };
+  
+  const nextState = produce(state, draft => {
+      draft.number += 1;
+  });
+  
+  console.log(nextState); //{number: 2, dontchangeMe: 2}
+  ```
+
+- produce를 첫번째 파라미터가 없는채로 이용하면 상태를 반환하는 게 아니라 **상태를 업데이트 해주는 함수** 를 반환한다. (파라미터로 상태를 넘겨야함!)
+
+  ```react
+  const test = {
+      number: 1,
+      dontchangeMe: 2,
+    };
+  
+    const nextState = produce((draft) => {
+      draft.number += 1;
+    });
+    console.log(nextState); //f(n){ var r,,,, 함수 리턴}
+    console.log(nextState(test)); //{number: 2, dontchangeMe: 2}
+  
+  ```
+
+- setState를 할 때 immer를 사용할 수 있음(업데이트 해주는 함수 넣어서 deps배열에 안넣어도 되는 거)
+
+  ```javascript
+  //immer 사용 전, 업데이트 해주는 함수를 이용
+  const onClick = useCallback(() => {
+    setTodo(todo => ({
+      ...todo,
+      done: !todo.done
+    }));
+  }, []);
+  
+  //immer가 함수 리턴해주는 걸 이용
+  const onClick = useCallback(() => {
+    setTodo(
+      produce(draft => {
+        draft.done = !draft.done;
+      })
+    );
+  }, []);
+  ```
+
+- immer를 사용하지 않은 코드가 더 빠르다.
+
+- Proxy라는 기능을 사용해서 react-native와 구형브라우저에서는 사용이 안됨.
+
+- 무조건적인 사용은 지양하고, 데이터 구조가 복잡해 지는 것을 방지해야 한다.
+
