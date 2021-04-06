@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { Component, useReducer } from "react";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -10,19 +10,43 @@ function reducer(state, action) {
       return state;
   }
 }
+//class 형 컴포넌트
+class Counter extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      counter: 0,
+      fixed:1
+    };
+  }
+  handleIncrease = () => {
+    this.setState({
+      counter: this.state.counter + 1
+    }, ()=>{
+      console.log("콜백", this.state.counter)
+    })
+    console.log(this.state.counter)
+  };
 
+  handleDecrease = () => {
+    this.setState({
+      counter: this.state.counter - 1
+    })
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>{this.state.counter}</h1>
+        <h4>고정된 값 : {this.state.fixed}</h4>
+        <button onClick={this.handleIncrease}>+1</button>
+        <button onClick={this.handleDecrease}>-1</button>
+      </div>
+    );
+  }
+}
+/*
 function Counter() {
-  /*
-  const [number, setNumber] = useState(0);
-
-  const onIncrease = () => {
-    setNumber((prevNumber) => prevNumber + 1);
-  };
-
-  const onDecrease = () => {
-    setNumber((prevNumber) => prevNumber - 1);
-  };
-  */
   const [number, dispatch] = useReducer(reducer, 0);
 
   const onIncrease = () => {
@@ -41,5 +65,5 @@ function Counter() {
     </div>
   );
 }
-
+*/
 export default Counter;

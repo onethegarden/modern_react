@@ -65,16 +65,6 @@ function App() {
   const { users } = state;
 
   const count = useMemo(() => countActiveUsers(users), [users]);
-  const test = {
-    number: 1,
-    dontchangeMe: 2
-};
-
-const nextState = produce(draft => {
-    draft.number += 1;
-});
-console.log(nextState)
-console.log(nextState(test)); //{number: 2, dontchangeMe: 2}
   
   return (
     <>

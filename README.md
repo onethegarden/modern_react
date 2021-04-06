@@ -488,3 +488,110 @@ const nextState = produce(state, draft => {
 
 - 무조건적인 사용은 지양하고, 데이터 구조가 복잡해 지는 것을 방지해야 한다.
 
+<br/><br/><br/><br/><br/><br/>
+
+## 클래스형 컴포넌트
+
+> vanilla 로 class로 구현할 때 이해되지 않았던 것들이 이해됐다.
+
+```react
+import React, { Component } from 'react';
+
+class Counter extends Component {
+  handleIncrease() { //얘가 커스텀 메서드
+    console.log('increase');
+    console.log(this); // undefine 출력
+  }
+
+  handleDecrease() {
+    console.log('decrease');
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>0</h1>
+        <button onClick={this.handleIncrease}>+1</button>
+        <button onClick={this.handleDecrease}>-1</button>
+      </div>
+    );
+  }
+}
+
+export default Counter;
+```
+
+<br/><br/>
+
+#### 커스텀메서드
+
+1. 특정 작업을 실행하고 싶다면 클래스 안에 **커스텀 메서드**를 만들어야 한다.
+2. ```render()```함수 안에 쓸 수도 있지만, 일반적으로 **그렇게 하지 않는다.**
+
+3. 명명 규칙은 보통 ```handle...```라고 이름짓는다.
+
+4. 커스텀 메서드에서 ```this```는 컴포넌트 인스턴스를 가리키지 않기 때문에 따로 설정을 해줘야 한다. (3가지)
+
+   - constructor 에서 ```bind```작업 : ```this```를 직접 설정 가능, 생성자 함수를 먼저 실행해 주고 우리가 할 작업을 하겠다 라는 의미라고 함
+
+     ```react
+     constructor(props) {
+         super(props);
+         this.handleIncrease = this.handleIncrease.bind(this);
+         this.handleDecrease = this.handleDecrease.bind(this);
+       }
+     ```
+
+   - 커스텀 메서드 선언 시 화살표 함수를 이용
+
+     ```react
+     handleIncrease = () => {
+         console.log('increase');
+         console.log(this);
+       };
+     ```
+
+   - ```onClick```에서 새로운 함수를 만들어서 전달 (렌더링 할 때마다 함수가 새로 만들어져, 나중에 컴포넌트 최적화 시 까다로움)
+
+     ```react
+     return (
+       <div>
+         <h1>0</h1>
+         <button onClick={() => this.handleIncrease()}>+1</button>
+         <button onClick={() => this.handleDecrease()}>-1</button>
+       </div>
+     );
+     ```
+
+<br/><br/>
+
+#### this.setState로 상태 설정하기
+
+```react
+ state = {
+    counter: 0,
+    fixed: 1
+  };
+
+  handleIncrease = () => {
+    this.setState({
+      counter: this.state.counter + 1 
+    }, () => {
+      console.log("콜백", this.state.counter) //콜백 1, 두번째로 찍힘
+    })
+    console.log(this.state.counter)//0, 얘 먼저 찍힘
+  };
+```
+
+- this.setState를 이용해 state를 설정할 수 있다.
+
+- fixed의 값은 그대로 유지되면서 counter의 값만 바꿀 수 있다.
+
+- setState는 단순히 상태를 바꿔주는 함수가 아니라 상태를 바꿔달라고 **요청**해주는 함수다. 
+
+  ```setState(updater, [callback]) ```
+
+  이런 식이기 때문에 위에 작성한 것과 같이 setState 후 무언가를 실행하려면 두번째 파라미터의 콜백함수를 이용해야한다.
+
+  
+
