@@ -593,5 +593,57 @@ export default Counter;
 
   이런 식이기 때문에 위에 작성한 것과 같이 setState 후 무언가를 실행하려면 두번째 파라미터의 콜백함수를 이용해야한다.
 
-  
+
+<br/><br/><br/><br/><br/><br/>
+
+## ComponentDidCatch 로 에러 처리하기, Sentry
+
+- ```ComponentDidCatch(에러내용, 에러발생위치)```  : 생명주기 메서드
+- ```this.state.error``` 값이 ```true```면 에러가 발생했다는 화면 띄워줌
+
+```react
+import React, { Component } from "react";
+
+class ErrorBoundary extends Component {
+  state = {
+    error: false,
+  };
+
+  componentDidCatch(error, info) {
+    console.log("에러가 발생했습니다.");
+    console.log({
+      error,
+      info,
+    });
+    this.setState({
+      error: true,
+    });
+  }
+
+  render() {
+    if (this.state.error) {
+      return <h1>에러 발생!</h1>;
+    }
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+```
+
+
+
+
+
+### Sentry 사용
+
+- 에러가 어디서 발생했는지 실시간으로 볼 수 있는 도구 사이트 : https://sentry.io/
+
+- Instruction에 나타난대로 작업하면 된다.
+
+  - ```yarn add @sentry/react @sentry/tracing```
+
+  - 이렇게 캐치된 에러를 보여줌 Ip, browser, os 등등,,
+
+    ![image](https://user-images.githubusercontent.com/51187540/113832137-46f7e480-97c3-11eb-9d26-ef1aada69d24.png)
 
