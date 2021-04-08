@@ -667,6 +667,8 @@ export default ErrorBoundary;
 > 상태관련 로직들을 다른 파일들로 분리시켜서 더욱 효율적으로 관리할 수 있다. 
 >
 > 특히, Context API와 useReducer Hook을 사용해서 개발하는 흐름과 매우 유사하다.
+>
+> 리덕스 모듈이란 액션타입, 액션생성함수, 리듀서 세 개가 모두 들어있는 자바스크립트 파일이다.
 
 <br/>
 
@@ -727,9 +729,7 @@ export default ErrorBoundary;
   - 리액트에서 리덕스를 쓸 때 이 함수를 직접 사용할 일은 별로 없음.
   - 보통 ```connect```함수 또는 ```useSelector``` Hook을 사용해서 리덕스 스토어 상태를 구독함
 
-<br/>
-
-<br/>
+<br/><br/>
 
 ### 리덕스의 세가지 규칙
 
@@ -747,3 +747,95 @@ export default ErrorBoundary;
 - 이전상태는 그대로 두고, 변화를 일으킨 새로운 상태를 만들어 반환한다.
 - 똑같은 파라미터로 호출된 리듀서는 언제나 똑같은 값을 반환해야 한다.
 - new Date()와 같은 값을 생성해 다른 결과값이 나타나는 작업이 필요하다면 리듀서 밖에서 작업해야한다.
+
+<br/><br/>
+
+### 리덕스 모듈 만들고 적용
+
+1. 모듈 (액션타입, 액션생성함수, 리듀서) (module/todo.js)
+
+   ```react
+   //액션타입선언
+   const ADD_TODO = "todos/ADD_TODO";
+   const TOGGLE_TODO = "todos/TOGGLE_TODO";
+   
+   let nextId = 1;
+   
+   //액션함수
+   export const addTodo = (text) => ({
+     type: "ADD_TODO",
+     todo: {
+       id: nextId++,
+       text,
+     },
+   });
+   
+   export const toggleTodo = (id) => ({
+     type: "TOGGLE_TODO",
+     id,
+   });
+   
+   //초기상태 선언
+   const initialState = [];
+   
+   //리듀서 선언
+   export default function todos(state = initialState, action) {
+     switch (action.type) {
+       case ADD_TODO:
+         return state.concat(action.todo);
+       case TOGGLE_TODO:
+         return state.map((todo) =>
+           todo.id === action.id ? { ...todo, done: !todo.done } : todo
+         );
+       default:
+         return state;
+     }
+   }
+   
+   ```
+
+2. 루트리듀서 - 한 프로젝트에 여러개의 리듀서가 있을 때 이걸 합쳐서 사용(module/index.js)
+
+   ```react
+   import { combineReducers } from 'redux';
+   import counter from './counter';
+   import todos from './todos';
+   
+   const rootReducer = combineReducers({
+     counter,
+     todos
+   });
+   
+   export default rootReducer;
+   ```
+
+3. 스토어 생성 및 적용(./index.js)
+
+   - 리액트에서는 ```react-redux```를 이용해 리덕스를 적용시켜야 한다.
+
+   - provider로 App을 감싸면 우리가 렌더링하는 것들이 스토어에 접근이 가능하게 됨
+
+   ```react
+   import React from 'react';
+   import ReactDOM from 'react-dom';
+   import './index.css';
+   import App from './App';
+   import * as serviceWorker from './serviceWorker';
+   import { createStore } from 'redux';
+   import { Provider } from 'react-redux';
+   import rootReducer from './modules';
+   
+   const store = createStore(rootReducer); // 스토어를 만듭니다.
+   
+   ReactDOM.render(
+     <Provider store={store}>
+       <App />
+     </Provider>,
+     document.getElementById('root')
+   );
+   
+   serviceWorker.unregister();
+   ```
+
+   
+
