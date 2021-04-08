@@ -794,6 +794,8 @@ export default ErrorBoundary;
    
    ```
 
+   <br/>
+
 2. 루트리듀서 - 한 프로젝트에 여러개의 리듀서가 있을 때 이걸 합쳐서 사용(module/index.js)
 
    ```react
@@ -808,6 +810,8 @@ export default ErrorBoundary;
    
    export default rootReducer;
    ```
+
+   <br/>
 
 3. 스토어 생성 및 적용(./index.js)
 
@@ -835,6 +839,41 @@ export default ErrorBoundary;
    );
    
    serviceWorker.unregister();
+   ```
+
+   <br/>
+
+4. 컴포넌트에서 리덕스 사용하기 (container/counterContainer.js)
+
+   - useSelector를 사용해 상태를 조회하고
+   - useDispatch를 사용해 스토어의 dispatch를 사용한다.
+
+   ```react
+   function CounterContainer() {
+     //useSelector는 스토어의 상태를 조회하는 훅
+     //state의 값은 store.getState를 호출한 것과 같음
+     const { number, diff } = useSelector((state) => ({
+       number: state.counter.number,
+       diff: state.counter.diff,
+     }));
+     //useDispatch는 리덕스 스토어의 dispatch를 함수에 사용할 수 있게해주는 hook
+     const dispatch = useDispatch();
+     //각 액션들을 디스패치하는 함수들
+     const onIncrease = () => dispatch(increase());
+     const onDecrease = () => dispatch(decrease());
+     const onSetDiff = (diff) => dispatch(setDiff(diff));
+     return (
+       <Counter
+         number={number}
+         diff={diff}
+         onIncrease={onIncrease}
+         onDecrease={onDecrease}
+         onSetDiff={onSetDiff}
+       />
+     );
+   }
+   
+   export default CounterContainer;
    ```
 
    

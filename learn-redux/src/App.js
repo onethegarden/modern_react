@@ -1,9 +1,10 @@
-
+import React from 'react';
+import CounterContainer from './container/CounterContainer';
 
 function App() {
   return (
     <div className="App">
-      리액트
+      <CounterContainer/>
     </div>
   );
 }
