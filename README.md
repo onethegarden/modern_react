@@ -8,6 +8,18 @@
 
 <br/><br/><br/>
 
+## contents
+
+- [Hook](#hook)
+
+- [Context API](#context-api)
+- [Immer를 사용한 불변성 관리](#immer를-사용한-불변성-관리)
+- [클래스형 컴포넌트](클래스형-컴포넌트)
+- [에러처리(ComponentDidCatch, Sentry)](#componentdidcatch-로-에러-처리하기-sentry)
+- [Redux](#redux)
+
+<br/><br/><br/>
+
 ## Hook
 
 <br/>
@@ -593,7 +605,6 @@ export default Counter;
 
   이런 식이기 때문에 위에 작성한 것과 같이 setState 후 무언가를 실행하려면 두번째 파라미터의 콜백함수를 이용해야한다.
 
-
 <br/><br/><br/><br/><br/><br/>
 
 ## ComponentDidCatch 로 에러 처리하기, Sentry
@@ -647,3 +658,92 @@ export default ErrorBoundary;
 
     ![image](https://user-images.githubusercontent.com/51187540/113832137-46f7e480-97c3-11eb-9d26-ef1aada69d24.png)
 
+<br/><br/><br/><br/><br/><br/>
+
+## Redux
+
+> 리액트 생태계에서 가장 사용률이 높은 상태관리 라이브러리
+>
+> 상태관련 로직들을 다른 파일들로 분리시켜서 더욱 효율적으로 관리할 수 있다. 
+>
+> 특히, Context API와 useReducer Hook을 사용해서 개발하는 흐름과 매우 유사하다.
+
+<br/>
+
+### 키워드
+
+- **액션(Action)** : 상태에 어떤 변화가 필요할 때 액션을 발생시킴
+
+  - type 필드를 필수적으로 가지고 있어야 하고 그 외의 값들은 마음대로 넣어줄 수 있음
+
+  ```react
+  {
+    type: "ADD_TODO",
+    data: {
+      id: 0,
+      text: "리덕스 배우기"
+    }
+  }
+  ```
+
+- **액션생성함수** : 액션을 만드는 함수, 파라미터를 받아와 액션 형태로 만들어준다.
+
+  ```react
+  export function addTodo(data) {
+    return {
+      type: "ADD_TODO",
+      data
+    };
+  }
+  ```
+
+- **리듀서(Reducer)** : 변화를 일으키는 함수, 
+
+  - state와 action을 파라미터로 받는다.
+  - 새로운 상태를 리턴한다.
+  - default로 state를 그대로 반환한다. 
+
+  ```react
+  function counter(state, action) {
+    switch (action.type) {
+      case 'INCREASE':
+        return state + 1;
+      case 'DECREASE':
+        return state - 1;
+      default:
+        return state;
+    }
+  }
+  ```
+
+- **스토어(Store)** : 한 어플리케이션당 하나의 스토어를 가짐. 현재의 앱 상태와 리듀서가 들어감
+
+- **디스패치(dispatch)** : 스토어의 내장함수
+
+  - ```dispatch(action)``` 이런식으로 액션을 발생시킴
+
+- **구독(subscribe)** : 스토어의 내장함수, subscribe함수에 특정 함수를 전달해주면, 액션이 디스패치 되었을때마다 전달해준 함수가 호출
+
+  - 리액트에서 리덕스를 쓸 때 이 함수를 직접 사용할 일은 별로 없음.
+  - 보통 ```connect```함수 또는 ```useSelector``` Hook을 사용해서 리덕스 스토어 상태를 구독함
+
+<br/>
+
+<br/>
+
+### 리덕스의 세가지 규칙
+
+**1. 하나의 애플리케이션, 하나의 스토어 **
+
+- 여러개의 스토어를 사용하는 것은 가능하나, 권장되지는 않음. 하지만 이렇게 하면 개발도구를 활용하지 못함
+
+**2. 상태는 읽기전용**
+
+- 상태를 업데이트 할 때 기존 배열은 수정하지 않고 새로운 배열을 만들어서 교체하는 방식으로 업데이트를 한다. (concat이나 spread연산자와 같은..)
+- 리덕스에서 불변성을 유지해야 하는 이유는 shallow compare는 equality를 체크하는 것인데 이 때 reference를 체크한다. 
+
+**3. 리듀서는 순수함수**
+
+- 이전상태는 그대로 두고, 변화를 일으킨 새로운 상태를 만들어 반환한다.
+- 똑같은 파라미터로 호출된 리듀서는 언제나 똑같은 값을 반환해야 한다.
+- new Date()와 같은 값을 생성해 다른 결과값이 나타나는 작업이 필요하다면 리듀서 밖에서 작업해야한다.
