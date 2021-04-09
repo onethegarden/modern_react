@@ -6,7 +6,7 @@ let nextId = 1;
 
 //액션함수
 export const addTodo = (text) => ({
-  type: "ADD_TODO",
+  type: ADD_TODO,
   todo: {
     id: nextId++,
     text,
@@ -14,7 +14,7 @@ export const addTodo = (text) => ({
 });
 
 export const toggleTodo = (id) => ({
-  type: "TOGGLE_TODO",
+  type: TOGGLE_TODO,
   id,
 });
 
