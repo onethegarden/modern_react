@@ -11,12 +11,12 @@
 ## contents
 
 - [Hook](#hook)
-
 - [Context API](#context-api)
 - [Immer를 사용한 불변성 관리](#immer를-사용한-불변성-관리)
 - [클래스형 컴포넌트](클래스형-컴포넌트)
 - [에러처리(ComponentDidCatch, Sentry)](#componentdidcatch-로-에러-처리하기-sentry)
 - [Redux](#redux)
+- [redux-middleware](#redux-middleware)
 
 <br/><br/><br/>
 
@@ -876,5 +876,27 @@ export default ErrorBoundary;
    export default CounterContainer;
    ```
 
-   
 
+<br/><br/><br/><br/><br/>
+
+## redux-middleware
+
+- 미들웨어의 템플릿
+
+  ```react
+  const middleware = store => next => action => {
+    // 하고 싶은 작업...
+  }
+  //아래와 동일
+  function middleware(store) {
+    return function (next) {
+      return function (action) {
+        // 하고 싶은 작업...
+      };
+    };
+  };
+  ```
+
+  - store : 리덕스 스토어 인스턴스, disaptch, getState, subscribe 내장함수가 들어있음
+  - next : 액션을 다음 미들웨어에게 전달하는 함수, ```next(action)``` 이런 식으로 사용, 이게 호출되지 않으면 액션이 무시되어 리듀서에게 전달되지 않음
+  - action : 현재 가리키고 있는 액션 객체
