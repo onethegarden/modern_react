@@ -900,3 +900,20 @@ export default ErrorBoundary;
   - store : 리덕스 스토어 인스턴스, disaptch, getState, subscribe 내장함수가 들어있음
   - next : 액션을 다음 미들웨어에게 전달하는 함수, ```next(action)``` 이런 식으로 사용, 이게 호출되지 않으면 액션이 무시되어 리듀서에게 전달되지 않음
   - action : 현재 가리키고 있는 액션 객체
+
+- redux-logger 사용법 (index.js)
+
+  ```react
+  import logger from 'redux-logger';
+  import { composeWithDevTools } from 'redux-devtools-extension';
+  
+  const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(logger)));
+  ReactDOM.render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    document.getElementById('root')
+  );
+  ```
+
+  

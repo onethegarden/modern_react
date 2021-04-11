@@ -5,6 +5,14 @@ const DECREASE = "DECREASE";
 export const increase = () => ({ type: INCREASE });
 export const decrease = () => ({ type: DECREASE });
 
+//getState를 쓰지 않는다면 굳이 파라미터로 받아올 필요가 없음
+export const increaseAsync = () => dispatch =>{
+  setTimeout(()=> dispatch(increase()), 1000);
+};
+export const decreaseAsync = () => dispatch =>{
+  setTimeout(()=> dispatch(decrease()), 1000);
+}
+
 //초깃값
 const initialState = 0;
 
