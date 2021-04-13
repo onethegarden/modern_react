@@ -916,4 +916,31 @@ export default ErrorBoundary;
   );
   ```
 
+
+<br/><br/><br/>
+
+### 리덕스 thunk
+
+> 리덕스에서 비동기 작업을 처리 할 때 가장 많이 사용하는 미들웨어
+>
+> 액션객체가 아닌 함수를 디스패치 할 수 있다.
+>
+> 이 함수를 만들어 주는 함수를 thunk라고 부른다.
+
+- thunk예시
+
+  ```react
+  const getComments = () => async (dispatch, getState) => {
+      //이 안에서는 액션을 dispatch 할 수도 있고, getState를 통해 상태 조회가능
+    const id = getState().post.activeId;
+    dispatch({ type: 'GET_COMMENTS' });//요청시작을 알리는 액션
+    try {
+      const comments = await api.getComments(id);//요청하고 
+      dispatch({ type:  'GET_COMMENTS_SUCCESS', id, comments });//성공
+    } catch (e) {
+      dispatch({ type:  'GET_COMMENTS_ERROR', error: e });//실패
+    }
+  }
+  ```
+
   
