@@ -17,6 +17,7 @@
 - [에러처리(ComponentDidCatch, Sentry)](#componentdidcatch-로-에러-처리하기-sentry)
 - [Redux](#redux)
 - [redux-middleware](#redux-middleware)
+- [CORS 와 Webpack DevServer Proxy](#CORS-와-Webpack-DevServer-Proxy)
 
 <br/><br/><br/>
 
@@ -916,7 +917,6 @@ export default ErrorBoundary;
   );
   ```
 
-
 <br/><br/><br/>
 
 ### 리덕스 thunk
@@ -943,4 +943,48 @@ export default ErrorBoundary;
   }
   ```
 
+
+<br/><br/><br/><br/><br/><br/>
+
+## CORS 와 Webpack DevServer Proxy
+
+> CORS : Cross-Origin Resource Sharing
+>
+> -> 데이터를 주고 받을 때 다른 출처의 자원에 접근할 수 있게 권한을 부여해주는 체제
+>
+> 브라우저간 데이터를 주고 받는 과정에서 이 공유 설정을 하지 않았다면 CORS에러가 발생한다.
+
+- 설정법
+  - 요청을 주는 쪽의 reqeust header와 요청을 받는 쪽의 response header의 특정 값을 설정하면 된다.
+  - request 헤더에는 Origin
+  - response 헤더에는 Access-Control-Allow-Origin 
+
+
+
+#### Webpack DevServer Proxy
+
+- 웹팩 개발서버의 프록시를 사용하게 되면 서버 -> 서버로 요청을 해서 CORS에러가 나지 않음
+
+- pacakge.json 에 proxy 설정값 추가
+
+  ```json
   
+  ...
+  
+  "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    },
+    "proxy": "http://localhost:4000"
+  ```
+
+  
+
