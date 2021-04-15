@@ -11,13 +11,22 @@
 ## contents
 
 - [Hook](#hook)
+
 - [Context API](#context-api)
+
 - [Immer를 사용한 불변성 관리](#immer를-사용한-불변성-관리)
+
 - [클래스형 컴포넌트](클래스형-컴포넌트)
+
 - [에러처리(ComponentDidCatch, Sentry)](#componentdidcatch-로-에러-처리하기-sentry)
+
 - [Redux](#redux)
+
 - [redux-middleware](#redux-middleware)
+
 - [CORS 와 Webpack DevServer Proxy](#CORS-와-Webpack-DevServer-Proxy)
+
+  
 
 <br/><br/><br/>
 
@@ -942,6 +951,79 @@ export default ErrorBoundary;
     }
   }
   ```
+
+<br/><br/><br/>
+
+### 리덕스 saga
+
+> redux-thunk 다음으로 가장 많이 사용되는 라이브러리
+>
+> 액션을 모니터링 하고 있다가, 특정 액션이 발생하면 이에 따라 특정 작업을 하는 방식
+
+- redux-saga가 처리할 수 있는 작업들
+
+  - 비동기 작업에서 기존 요청 취소 처리
+  - 특정 액션이 발생했을 때 액션 디스패치하거나, 자바스크립트 코드 실행
+  - 웹소켓을 사용하는 경우 Channel 이라는 기능을 사용하여 효율적으로 코드관리 가능
+  - API 요청 실패했을 때 재요청 작업 가능
+
+- 사가 만들기 (제너레이터 함수를 saga라고 부름)
+
+  ```react
+  //액션생성함수
+  export const getPosts = () => ({ type: GET_POSTS });
+  export const getPost = (id) => ({ type: GET_POST, payload: id, meta: id });
+  
+  //saga
+  function* getPostsSaga() {
+    try {
+      const posts = yield call(postsAPI.getPosts); //call을 사용하면 특정 함수를 호출, 결과물 반환될때까지 기다리기
+      yield put({
+        type: GET_POSTS_SUCCESS,
+        payload: posts,
+      }); //성공 액션 디스패치
+    } catch (e) {
+      yield put({
+      type: GET_POSTS_ERROR,
+        error: true,
+        payload: e,
+      }); //실패 액션 디스패치
+    }
+  }
+  
+  //saga
+  function* getPostSaga(action) {
+    const param = action.payload;
+    const id = action.meta;
+    try {
+      const post = yield call(postsAPI.getPostById, param); //api에 넣어주고 싶은 인자는 call함수의 두번째 파라미터로 넣어주기
+      yield put({
+        type: GET_POST_SUCCESS,
+        payload: post,
+        meta: id,
+      });
+    } catch (e) {
+      yield put({
+        type: GET_POST_ERROR,
+        error: true,
+        payload: e,
+        meta: id,
+      });
+    }
+  }
+  
+  //사가 합치기
+  export function* postsSaga() {
+    yield takeEvery(GET_POSTS, getPostsSaga);
+    yield takeLatest (GET_POST, getPostSaga);
+  }
+  ```
+  
+  - takeEvery : 등록된 모든 액션을 실행
+  - takeLatest : 등록된 액션중 최근에 디스패치된 액션만 실행 (1개만)
+  - ```getPosts```와 ```getPost```는 thunk는 thunk함수를 반환했고, saga를 쓰면 순수 액션객체를 반환하는 액션생성함수로 구현이 가능하다.
+  - 액션을 모니터링해서 특정 액션이 발생했을 때 호출할 사가 함수에서는 해당 액션을 받아올 수 있다. getPostSaga의 경우, 액션을 파라미터로 받아와 해당 액션의 id를 참조 할 수 있다.
+
 
 
 <br/><br/><br/><br/><br/><br/>

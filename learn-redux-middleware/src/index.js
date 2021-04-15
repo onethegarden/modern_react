@@ -4,14 +4,16 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { applyMiddleware, createStore } from "redux";
 import { Provider } from "react-redux";
-import rootReducer from "./modules";
+import rootReducer, { rootSaga } from "./modules";
 import logger from "redux-logger";
 import { composeWithDevTools } from "redux-devtools-extension";
 import ReduxThunk from "redux-thunk";
 import { Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
+import createSagaMiddleware from "redux-saga";
 
 const customHistory = createBrowserHistory();
+const sagaMiddleware = createSagaMiddleware(); //사가 미들웨어
 
 const store = createStore(
   rootReducer,
@@ -19,10 +21,15 @@ const store = createStore(
   composeWithDevTools(
     applyMiddleware(
       ReduxThunk.withExtraArgument({ history: customHistory }),
+      sagaMiddleware, //사가 미들웨어 적용
       logger
     )
   )
 );
+
+//주의 //스토어 생성이 된 다음에 이 코드가 실행되어야 함
+sagaMiddleware.run(rootSaga); //루트 사가 실행
+
 ReactDOM.render(
   <Router history={customHistory}>
     <Provider store={store}>

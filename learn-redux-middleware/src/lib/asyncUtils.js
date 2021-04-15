@@ -1,3 +1,37 @@
+import { call, put } from "redux-saga/effects";
+
+//promise를 기다렸다가 결과를 디스패치하는 사가
+export const createPromiseSaga = (type, promiseCreator) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return function* saga(action) {
+    try {
+      //재사용성을 위하여 promiseCreator의 파라미터엔 payload값을 넣음
+      const payload = yield call(promiseCreator, action.payload);
+      yield put({ type: SUCCESS, payload });
+    } catch (e) {
+      yield put({ type: ERROR, error: true, payload: e });
+    }
+  };
+};
+//특정 id의 데이터 조회 용도로 사용하는 사가
+//API 호출 시 파라미터는 action.payload를 넣고
+//id 값을 action.meta로 설정
+export const createPromiseSagaById = (type, promiseCreator) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return function* saga(action) {
+    const id = action.meta;
+    try {
+      const payload = yield call(promiseCreator, action.payload);
+      yield put({ type: SUCCESS, payload, meta: id });
+    } catch (e) {
+      yield put({ type: ERROR, error: e, meta: id });
+    }
+  };
+};
+
+/**
+ * thunk 관련 함수
+ */
 //Promise 기반한 thunk 만들어주는 함수
 export const createPromiseThunk = (type, promiseCreator) => {
   const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
@@ -72,6 +106,9 @@ export const handleAsyncActions = (type, key, keepData = false) => {
   };
 };
 
+/**
+ * thunk 관련 함수
+ */
 //특정 id를 처리하는 thunk생성함수
 const defaultIdSelector = (param) => param;
 export const createPromiseThunkById = (

@@ -1,11 +1,13 @@
 import * as postsAPI from "../api/posts"; //api/posts 안의 함수 모두 부르기
 import {
-  createPromiseThunk,
   reducerUtils,
   handleAsyncActions,
-  createPromiseThunkById,
   handleAsyncActionsById,
-} from "../lib/asyncdUtils";
+  createPromiseSaga,
+  createPromiseSagaById,
+} from "../lib/asyncUtils";
+import { call, put, takeEvery } from "redux-saga/effects";
+
 //액션타입
 
 //포스트 여러개 조회
@@ -18,8 +20,21 @@ const GET_POST = "GET_POST";
 const GET_POST_SUCCESS = "GET_POST_SUCCESS";
 const GET_POST_ERROR = "GET_POST_ERROR";
 
-export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts);
-export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById);
+export const getPosts = () => ({ type: GET_POSTS });
+export const getPost = (id) => ({ type: GET_POST, payload: id, meta: id });
+
+const getPostsSaga = createPromiseSaga(GET_POSTS, postsAPI.getPosts);
+const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
+
+//사가 합치기
+export function* postsSaga() {
+  yield takeEvery(GET_POSTS, getPostsSaga);
+  yield takeEvery(GET_POST, getPostSaga);
+}
+// 3번째 인자를 사용하면 withExtraArgument 에서 넣어준 값들을 사용
+export const goToHome = () => (dispatch, getState, { history }) => {
+  history.push("/");
+};
 
 const initialState = {
   posts: reducerUtils.initial(),
@@ -40,7 +55,3 @@ export default function posts(state = initialState, action) {
       return state;
   }
 }
-
-export const goToHome = () => (dispatch, getState, { history }) => {
-  history.push("/");
-};
