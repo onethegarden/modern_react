@@ -26,6 +26,8 @@
 
 - [CORS 와 Webpack DevServer Proxy](#CORS-와-Webpack-DevServer-Proxy)
 
+- [리액트와 타입스크립트](#리액트와_타입스크립트)
+
   
 
 <br/><br/><br/>
@@ -1084,3 +1086,27 @@ export default ErrorBoundary;
    - 타입추론이 가능하여 오타가 나도 IDE상에서 바로 알 수 있음
    - null, undefined 일수도 있는 값이 있으면 오류를 띄움
 
+<br/><br/><br/>
+
+### 시작하기
+
+```
+npx create-react-app ts-react-tutorial --template typescript
+```
+
+
+
+### React.FC
+
+- 컴포넌트들을 보면 ```const App: React.FC = () => {...}``` 과 같이 선언되었다. ```React.FC를 사용할 떄는 props의 타입을 generics으로 넣어서 사용한다.
+
+  ```typescript
+  const Greetings: React.FC<GreetingsProps> = ({ name }) => (
+    <div>Hello, {name}</div>
+  );
+  ```
+
+  - 장점 : props에 기본적으로 children이 들어가 있다, chirdrenm의 prop을 지정하지 않더라도 오류없이 동작
+  - 단점 : React.FC는 defaultProps 연결을 끊고 props를 기본값으로 설정한다.
+
+참고 : https://velog.io/@namezin/Why-I-dont-use-React.FC
