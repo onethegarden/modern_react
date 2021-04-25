@@ -28,6 +28,8 @@
 
 - [리액트와 타입스크립트](#리액트와_타입스크립트)
 
+- [타입스크립트로 리액트 상태관리](#타입스크립트로-리액트-상태관리)
+
   
 
 <br/><br/><br/>
@@ -1070,7 +1072,6 @@ export default ErrorBoundary;
     "proxy": "http://localhost:4000"
   ```
 
-
 <br/><br/><br/><br/><br/><br/>
 
 ## 리액트와 타입스크립트
@@ -1098,7 +1099,7 @@ npx create-react-app ts-react-tutorial --template typescript
 
 ### React.FC
 
-- 컴포넌트들을 보면 ```const App: React.FC = () => {...}``` 과 같이 선언되었다. ```React.FC를 사용할 떄는 props의 타입을 generics으로 넣어서 사용한다.
+- 컴포넌트들을 보면 ```const App: React.FC = () => {...}``` 과 같이 선언되었다. ```React.FC```를 사용할 떄는 props의 타입을 generics으로 넣어서 사용한다.
 
   ```typescript
   const Greetings: React.FC<GreetingsProps> = ({ name }) => (
@@ -1110,3 +1111,215 @@ npx create-react-app ts-react-tutorial --template typescript
   - 단점 : React.FC는 defaultProps 연결을 끊고 props를 기본값으로 설정한다.
 
 참고 : https://velog.io/@namezin/Why-I-dont-use-React.FC
+
+
+
+### type 선언
+
+- 어떤 값을 해당 컴포넌트에서 사용을 하려면 type을 선언해줘야 하는데 두 가지로 선언할 수 있다. 1
+- interface, type
+
+```typescript
+interface Point {
+  x: number;
+  y: number;
+}
+
+type Point2 = {
+  x: number;
+  y: number;
+};
+
+
+function MyForm({ point }: Point2) {
+    ...
+    return(
+    ...
+    )
+    
+}
+export default MyForm;
+```
+
+참고 : https://blog.bitsrc.io/react-typescript-cheetsheet-2b6fa2cecfe2
+
+<br/>
+
+### event의 타입
+
+- 작성한 함수 onchange 에 커서를 올리면 자동완성으로 ```React.ChangeEvent<HTMLInputElement>```라고 나온다
+
+  ```
+  <input name="name" value={name} onChange={onChange} />
+  ```
+
+<br/>
+
+<br/><br/><br/><br/><br/><br/>
+
+## 타입스크립트로 리액트 상태관리
+
+### 1. ```useState```
+
+- generics를 사용하여 해당 상태가 어떤 타입을 가지고 있을 지 설정
+
+  ```react
+  const [count, setCount] = useState<number>(0);
+  ```
+
+- useState사용할 때 알아서 type을 유추하기 때문에 generics을 선언하지 않아도 되는데, null이 들어가도 있을 때 활용하면 좋다고 한다.
+
+  ```react
+  type Information = { name: string; description: string };
+  const [info, setInformation] = useState<Information | null>(null);
+  ```
+
+<br/>
+
+#### useState를 사용한 form 핸들
+
+- src/MyForm.tsx
+
+  ```react
+  import React, { useState } from 'react';
+  
+  type MyFormProps = {
+    onSubmit: (form: { name: string; description: string }) => void;
+  };
+  
+  function MyForm({ onSubmit }: MyFormProps) {
+    const [form, setForm] = useState({
+      name: '',
+      description: ''
+    });
+  
+    const { name, description } = form;
+  
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setForm({
+        ...form,
+        [name]: value
+      });
+    };
+  
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      // 여기도 모르니까 any 로 하겠습니다.
+      e.preventDefault();
+      onSubmit(form);
+      setForm({
+        name: '',
+        description: ''
+      }); // 초기화
+    };
+  
+    return (
+      <form onSubmit={handleSubmit}>
+        <input name="name" value={name} onChange={onChange} />
+        <input name="description" value={description} onChange={onChange} />
+        <button type="submit">등록</button>
+      </form>
+    );
+  }
+  
+  export default MyForm;
+  ```
+
+- src/App.tsx
+
+  ```react
+  import React from 'react';
+  import MyForm from './MyForm';
+  
+  const App: React.FC = () => {
+    const onSubmit = (form: { name: string; description: string }) => {
+      console.log(form);
+    };
+    return <MyForm onSubmit={onSubmit} />;
+  };
+  
+  export default App;
+  ```
+
+<br/><br/>
+
+### 2. ```useReducer```
+
+- 사용할 타입들을 지정
+
+- 액션의 정의 
+
+  - ```|``` 로 액션을 나열, 액션객체에 필요한 값들도 타입안에 명시하면 리듀서 작성 시 자동완성 되고 dispatch할 때 타입검사 해줌
+
+  ```react
+  type Action = 
+    | { type: 'SET_COUNT'; count: number } 
+    | { type: 'TOGGLE_GOOD' };
+  ```
+
+  
+
+```react
+import React, { useReducer } from 'react';
+
+type Color = 'red' | 'orange' | 'yellow';
+
+type State = {
+  count: number;
+  isGood: boolean;
+};
+
+type Action = //action을 | 로 나열
+  | { type: 'SET_COUNT'; count: number } 
+  | { type: 'TOGGLE_GOOD' };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'SET_COUNT':
+      return {
+        ...state,
+        count: action.count // count가 자동완성, number 타입인걸 알 수 있음
+      };
+    case 'TOGGLE_GOOD':
+      return {
+        ...state,
+        isGood: !state.isGood
+      };
+    default:
+      throw new Error('Unhandled action');
+  }
+}
+
+function ReducerSample() {
+  const [state, dispatch] = useReducer(reducer, {
+    count: 0,
+    isGood: true
+  });
+
+  const setCount = () => dispatch({ type: 'SET_COUNT', count: 5 }); 
+    // count 를 넣지 않으면 에러발생
+  const toggleGood = () => dispatch({ type: 'TOGGLE_GOOD' });
+
+  return (
+    <div>
+      <p>
+        <code>count: </code> {state.count}
+      </p>
+      <p>
+        <code>isGood: </code> {state.isGood ? 'true' : 'false'}
+      </p>
+      <div>
+        <button onClick={setCount}>SET_COUNT</button>
+        <button onClick={toggleGood}>TOGGLE_GOOD</button>
+      </div>
+    </div>
+  );
+}
+
+export default ReducerSample;
+```
+
+
+
+
+
