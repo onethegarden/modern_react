@@ -10,7 +10,7 @@ type TodoItemProps = {
 function TodoItem({ todo, onToggle, onRemove }: TodoItemProps) {
   //CSS Properties = style 객체의 타입
   const textStyle: CSSProperties = {
-    textDecoration: todo.done ? "line-though" : "none",
+    textDecoration: todo.done ? "line-through" : "none",
   };
   const removeStyle: CSSProperties = {
     marginLeft: 8,
