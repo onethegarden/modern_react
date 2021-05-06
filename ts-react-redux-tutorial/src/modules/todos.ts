@@ -1,34 +1,27 @@
+import {
+    action,
+    deprecated,
+    ActionType,
+    createReducer
+} from 'typesafe-actions';
+
 //액션타입 선언
 const ADD_TODO = 'todos/ADD_TODO' as const; //as const를 붙여줌으로써 나중에 추론될 때 string으로 추론도ㅣ지 않고 todos/ADD_TODO 로 추론되도록
 const TOGGLE_TODO = 'todos/TOGGLE_TODO' as const;
 const REMOVE_TODO = 'todos/REMOVE_TODO' as const;
 
+const { createStandardAction } = deprecated;
+
 let nextId = 1; //새로운 항목을 추가 할 때 사용할 고유 id 값
 
 //액션 생성 함수
-export const addTodo = (text: string) => ({
-    type: ADD_TODO,
-    payload: {
-        id: nextId++,
-        text
-    }
-});
-
-export const toggleTodo = (id: number) => ({
-    type: TOGGLE_TODO,
-    payload: id,
-});
-
-export const removeTodo = (id: number) => ({
-    type: REMOVE_TODO,
-    payload: id,
-})
+export const addTodo = (text: string) => action(ADD_TODO, { id: nextId++, text })
+export const toggleTodo = createStandardAction(TOGGLE_TODO)<number>();
+export const removeTodo = createStandardAction(REMOVE_TODO)<number>();
 
 //모든 액션 객체들에 대한 타입 
-type TodosAction =
-    | ReturnType<typeof addTodo>
-    | ReturnType<typeof toggleTodo>
-    | ReturnType<typeof removeTodo>;
+const actions = { addTodo, toggleTodo, removeTodo };
+type TodosAction = ActionType<typeof actions>;
 
 //상태에서 사용할 할 일 목록
 export type Todo = {
@@ -45,6 +38,18 @@ const initialState: TodosState = [];
 
 
 //리듀서 작성
+const todos = createReducer<TodosState, TodosAction>(initialState, {
+    [ADD_TODO]: (state, action) =>
+        state.concat({
+            ...action.payload,
+            done: false
+        }),
+     [TOGGLE_TODO]: (state, { payload: id }) =>
+    state.map(todo => (todo.id === id ? { ...todo, done: !todo.done } : todo)),
+    [REMOVE_TODO]: (state, { payload: id }) =>
+    state.filter(todo => todo.id !== id)
+})
+/*
 function todos(
     state: TodosState = initialState,
     action: TodosAction
@@ -67,6 +72,6 @@ function todos(
         default:
             return state;
     }
-}
+}*/
 
 export default todos;
