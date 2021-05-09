@@ -30,6 +30,8 @@
 
 - [타입스크립트로 리액트 상태관리](#타입스크립트로-리액트-상태관리)
 
+- [typesafe-actions 리팩토링](#typesafe-actions-리팩토링)
+
   
 
 <br/><br/><br/>
@@ -1319,7 +1321,255 @@ function ReducerSample() {
 export default ReducerSample;
 ```
 
+<br/>
+
+<br/><br/><br/><br/><br/><br/>
+
+
+
+## typesafe-actions 리팩토링
+
+```
+$ yarn add typesafe-actions
+```
+
+- 이전
+
+  ```react
+  //액션타입 선언
+  const ADD_TODO = 'todos/ADD_TODO' as const; //as const를 붙여줌으로써 나중에 추론될 때 string으로 추론도ㅣ지 않고 todos/ADD_TODO 로 추론되도록
+  const TOGGLE_TODO = 'todos/TOGGLE_TODO' as const;
+  const REMOVE_TODO = 'todos/REMOVE_TODO' as const;
+  
+  let nextId = 1; //새로운 항목을 추가 할 때 사용할 고유 id 값
+  
+  //액션 생성 함수
+  export const addTodo = (text: string) => ({
+      type: ADD_TODO,
+      payload: {
+          id: nextId++,
+          text
+      }
+  });
+  
+  export const toggleTodo = (id: number) => ({
+      type: TOGGLE_TODO,
+      payload: id,
+  });
+  
+  export const removeTodo = (id: number) => ({
+      type: REMOVE_TODO,
+      payload: id,
+  })
+  
+  //모든 액션 객체들에 대한 타입 
+  type TodosAction =
+      | ReturnType<typeof addTodo>
+      | ReturnType<typeof toggleTodo>
+      | ReturnType<typeof removeTodo>;
+  
+  //상태에서 사용할 할 일 목록
+  export type Todo = {
+      id: number;
+      text: string;
+      done: boolean;
+  };
+  
+  //이 모듈에서 관리할 상태는 Todo 객체로 이루어진 배열
+  export type TodosState = Todo[];
+  
+  //초기상태 선언
+  const initialState: TodosState = [];
+  
+  
+  //리듀서 작성
+  function todos(
+      state: TodosState = initialState,
+      action: TodosAction
+  ): TodosState{
+      switch (action.type) {
+          case ADD_TODO:
+              return state.concat({
+                  id: action.payload.id,
+                  text: action.payload.text,
+                  done: false
+              });
+          case TOGGLE_TODO:
+              return state.map(todo =>
+                  todo.id === action.payload ? { ...todo, done: !todo.done } : todo
+              );
+          case REMOVE_TODO:
+              return state.filter(todo => todo.id !== action.payload);
+          default:
+              return state;
+      }
+  }
+  
+  export default todos; 
+  ```
+
+- typesafe-actions 적용 후 
+
+  ```react
+  import {
+      action,
+      deprecated,
+      ActionType,
+      createReducer
+  } from 'typesafe-actions';
+  
+  //액션타입 선언
+  const ADD_TODO = 'todos/ADD_TODO';
+  const TOGGLE_TODO = 'todos/TOGGLE_TODO';
+  const REMOVE_TODO = 'todos/REMOVE_TODO';
+  
+  const { createStandardAction } = deprecated;
+  
+  let nextId = 1; //새로운 항목을 추가 할 때 사용할 고유 id 값
+  
+  //액션 생성 함수
+  export const addTodo = (text: string) => action(ADD_TODO, { id: nextId++, text })
+  export const toggleTodo = createStandardAction(TOGGLE_TODO)<number>();
+  export const removeTodo = createStandardAction(REMOVE_TODO)<number>();
+  
+  //모든 액션 객체들에 대한 타입 
+  const actions = { addTodo, toggleTodo, removeTodo };
+  type TodosAction = ActionType<typeof actions>;
+  
+  //상태에서 사용할 할 일 목록
+  export type Todo = {
+      id: number;
+      text: string;
+      done: boolean;
+  };
+  
+  //이 모듈에서 관리할 상태는 Todo 객체로 이루어진 배열
+  export type TodosState = Todo[];
+  
+  //초기상태 선언
+  const initialState: TodosState = [];
+  
+  
+  //리듀서 작성
+  const todos = createReducer<TodosState, TodosAction>(initialState, {
+      [ADD_TODO]: (state, action) =>
+          state.concat({
+              ...action.payload,
+              done: false
+          }),
+       [TOGGLE_TODO]: (state, { payload: id }) =>
+      state.map(todo => (todo.id === id ? { ...todo, done: !todo.done } : todo)),
+      [REMOVE_TODO]: (state, { payload: id }) =>
+      state.filter(todo => todo.id !== id)
+  })
+  
+  export default todos;
+  ```
 
 
 
 
+<br/><br/><br/>
+
+### 리덕스 모듈 여러 파일로 분리
+
+#### 파일구조
+
+```
+├─ modules
+│  │  
+│  ├─todos
+│  │       actions.ts
+│  │       index.ts
+│  │       reducer.ts
+│  │       types.td
+│  └─counter.ts #파일이 그렇게 길지 않은 경우
+│         
+│          
+```
+
+</br>
+
+#### 작성 예시
+
+- **actions.ts** : 액션 정의
+
+  ```react
+  import { deprecated, action } from "typesafe-actions";
+  
+  const { createStandardAction } = deprecated;
+  
+  //리듀서에서 사용 할 수 있도록 타입 내보내줌
+  export const ADD_TODO = "todos/ADD_TODO";
+  export const TOGGLE_TODO = "todos/TOGGLE_TODO";
+  export const REMOVE_TODO = "todos/REMOVE_TODO";
+  
+  let nextId = 1; //새로운 항목을 추가 할 때 사용할 고유 ID값
+  
+  //액션생성함수
+  //액션생성 함수의 경우 파라미터를 기반하여 커스터마이징 된 payload를 설정해줘야함
+  //action = 액션 객체를 만드는 함수
+  export const addTodo = (text: string) =>
+    action(ADD_TODO, { id: nextId++, text });
+  export const toggleTodo = createStandardAction(TOGGLE_TODO)<number>();
+  export const removeTodo = createStandardAction(REMOVE_TODO)<number>();
+  ```
+
+</br>
+
+- **types.ts**  : 액션객체들의 타입, 상태의 타입 설정
+
+  ```react
+  import { ActionType } from 'typesafe-actions';
+  import * as actions from './actions';
+  
+  export type TodosAction = ActionType<typeof actions>;
+  
+  export type Todo = {
+      id: number;
+      text: string;
+      done: boolean;
+  }
+  
+  export type TodosState = Todo[];
+  ```
+
+</br>
+
+- **reducer.ts** : 리듀서 정의
+
+  ```react
+  import { TodosState, TodosAction } from './types';
+  import { createReducer } from 'typesafe-actions';
+  import { ADD_TODO, TOGGLE_TODO, REMOVE_TODO } from './actions';
+  
+  //초기 상태 선언
+  const initialState: TodosState = [];
+  
+  //리듀서 작성
+  const reducer = createReducer<TodosState, TodosAction>(initialState, {
+      [ADD_TODO]: (state, action) =>
+          state.concat({
+              ...action.payload, //id, text가 이 안에
+              done: false
+          }),
+      [TOGGLE_TODO]: (state, { payload: id }) =>
+          state.map(todo => (todo.id === id ? { ...todo, done: !todo.done } : todo)),
+      [REMOVE_TODO]: (state, { payload: id }) =>
+          state.filter(todo => todo.id !== id)
+  });
+  
+  export default reducer;
+  ```
+
+</br>
+
+- **index.ts** : 기존에 todos.ts 를 불러와서 사용하던 코드들이 (컨테이너 및 루트 리듀서) 별도의 import 경로 수정 없이 제대로 동작하기 위해 작성
+
+  ```react
+  export { default } from './reducer'; //reducer를 불러와 default로 내보내겠다
+  export * from './actions'; //모든 액션함수를 불러와서 같은 이름들로 내보내겠다
+  export * from './types'; //모든 타입들을 불러와서 같은 이름으로 내보내겠따
+  ```
+
+  
