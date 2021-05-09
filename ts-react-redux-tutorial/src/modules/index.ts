@@ -1,10 +1,12 @@
-import { combineReducers } from 'redux';
-import counter from './counter';
-import todos from './todos';
+import { combineReducers } from "redux";
+import counter from "./counter";
+import todos from "./todos";
+import greet from "./greet";
 
 const rootReducer = combineReducers({
-    counter,
-    todos
+  counter,
+  todos,
+  greet,
 });
 
 //루트 리듀서 내보내기
