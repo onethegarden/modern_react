@@ -4,6 +4,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
+import Thunk from "redux-thunk";
 import rootReducer from "./modules";
 
 const store = createStore(rootReducer);
