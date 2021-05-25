@@ -2,11 +2,13 @@ import { combineReducers } from "redux";
 import counter from "./counter";
 import todos from "./todos";
 import greet from "./greet";
+import github from "./github";
 
 const rootReducer = combineReducers({
   counter,
   todos,
   greet,
+  github,
 });
 
 //루트 리듀서 내보내기
