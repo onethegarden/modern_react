@@ -12,6 +12,7 @@ function GithubProfileLoader() {
   const dispatch = useDispatch();
 
   const onSubmitUsername = (username: string) => {
+    console.log(username);
     dispatch(getUserProfileThunk(username));
   };
 
