@@ -4,6 +4,7 @@ import { GithubAction } from "./types";
 import { getUserProfile } from "../../api/github";
 import { getUserProfileAsync } from "./actions";
 
+/*
 export function getUserProfileThunk(
   username: string
 ): ThunkAction<void, RootState, null, GithubAction> {
@@ -18,3 +19,4 @@ export function getUserProfileThunk(
     }
   };
 }
+*/
