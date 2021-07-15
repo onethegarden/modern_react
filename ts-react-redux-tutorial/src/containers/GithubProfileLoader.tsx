@@ -7,11 +7,14 @@ import { getUserProfileAsync } from "../modules/github";
 //import { getUserProfileThunk } from "../modules/github";
 
 function GithubProfileLoader() {
-  const { data, loading, error } = useSelector((state: RootState) => state.github.userProfile);
+  const { data, loading, error } = useSelector(
+    (state: RootState) => state.github.userProfile
+  );
   const dispatch = useDispatch();
 
   const onSubmitUsername = (username: string) => {
     //dispatch(getUserProfileThunk(username));
+    console.log(username);
     dispatch(getUserProfileAsync.request(username));
   };
 
